@@ -35,16 +35,17 @@ export const StateContextProvider=({children})=>{
             for(let i=0;i<10;i++)
             {
                 const ticket=await contract.methods.tickets(i).call();
-                allTickets=[...allTickets,ticket];
+                allTickets=[...allTickets,{...ticket,id:i}];
             }
-            setTickets(allTickets);
-            // console.log(allTickets);
+            console.log(allTickets);
+            setTickets(allTickets.filter((ticket)=>ticket.isAvailaible));
         }
         catch(e)
         {
             console.log(e);
         }
     }
+
     useEffect(()=>{
         fetchData();
     },[]);
@@ -65,20 +66,43 @@ export const StateContextProvider=({children})=>{
     }
 
     // a function to diconnect to metamask wallet
-    const disconnect=async ()=>{
+    const disconnect= ()=>{
         console.log("disconnecting to metamask");
         try{
-            await deactivate();
+            deactivate();
         }
         catch(e)
         {
             console.log(e);
         }
     }
-
+     
+    // a function to buy a ticket
+    const buyTicket=async (ticket,i)=>{
+        if(account)
+        {
+            try{
+                const originalTicket=await contract.methods.tickets(i).call();
+                console.log("from the blockchain",originalTicket);
+                await contract.methods
+                .buyTicket(i)
+                .send({ from: "0x10c8937482c3Ee59eDf0eB0f41dCF0888AE9cdBa", value: ticket.price });
+                await fetchData();
+                console.log("from the blockchain",ticket);
+            }
+            catch(e)
+            {
+                console.log(e.message);
+            }
+            console.log("You are buying the ticket",ticket);
+        }
+        else{
+            console.log("The wallet is not connected");
+        }
+    }
 
     return (
-        <StateContext.Provider value={{connect,disconnect,account,active,tickets}}>
+        <StateContext.Provider value={{connect,disconnect,account,active,tickets,buyTicket}}>
             {children}
         </StateContext.Provider>)
 }

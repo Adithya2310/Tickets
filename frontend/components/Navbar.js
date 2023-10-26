@@ -8,10 +8,10 @@ const Navbar = () => {
     await connect().catch(err=>console.log("error",err));
   }
   const handleDisconnect=async()=>{
-    await disconnect().catch(err=>console.log(e));
+    await disconnect();
   }
   return (
-    <div className=" text-center">
+    <div className=" text-center mb-16 mt-4">
     {
       active?<button onClick={handleDisconnect}>Disconnect</button>:<button onClick={handleConnect}>Connect</button>
     }
